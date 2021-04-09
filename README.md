@@ -400,6 +400,8 @@ olm is a bit like kubernete's version of a package manager, e.g. like yum, dnf, 
 Next we create the bundle image for our operator (https://sdk.operatorframework.io/docs/building-operators/golang/quickstart/):
 
 ```
+$ echo $OPERATOR_IMG
+quay.io/sher_chowdhury0/mysql-operator2:v0.0.1
 make bundle IMG=$OPERATOR_IMG
 
 /Users/sherchowdhury/github/mysql-operator2/mysql-operator2/bin/controller-gen "crd:trivialVersions=true,preserveUnknownFields=false" rbac:roleName=manager-role webhook paths="./..." output:crd:artifacts:config=config/crd/bases
@@ -592,6 +594,49 @@ drwx------   4 sherchowdhury  staff  128  9 Apr 10:31 prometheus
 drwx------  13 sherchowdhury  staff  416  9 Apr 11:02 rbac
 drwx------   4 sherchowdhury  staff  128  9 Apr 10:44 samples              <==
 drwxr-xr-x   5 sherchowdhury  staff  160  9 Apr 10:31 scorecard            <==
+```
+
+Next we create the bundle image and push it up (https://sdk.operatorframework.io/docs/building-operators/golang/quickstart/):
+
+```
+$ # Note the "-bundle" component in the image name below.
+$ export BUNDLE_IMG="quay.io/sher_chowdhury0/mysql-operator2-bundle:v0.0.1"
+
+$ make bundle-build BUNDLE_IMG=$BUNDLE_IMG               
+
+docker build -f bundle.Dockerfile -t quay.io/sher_chowdhury0/mysql-operator2-bundle:v0.0.1 .
+[+] Building 0.2s (7/7) FINISHED                                                                                          
+ => [internal] load build definition from bundle.Dockerfile                                                          0.0s
+ => => transferring dockerfile: 44B                                                                                  0.0s
+ => [internal] load .dockerignore                                                                                    0.0s
+ => => transferring context: 35B                                                                                     0.0s
+ => [internal] load build context                                                                                    0.0s
+ => => transferring context: 727B                                                                                    0.0s
+ => CACHED [1/3] COPY bundle/manifests /manifests/                                                                   0.0s
+ => CACHED [2/3] COPY bundle/metadata /metadata/                                                                     0.0s
+ => CACHED [3/3] COPY bundle/tests/scorecard /tests/scorecard/                                                       0.0s
+ => exporting to image                                                                                               0.0s
+ => => exporting layers                                                                                              0.0s
+ => => writing image sha256:92526e73c1cca5140b8c6113be4d9dbb05cb797eef6ce0d7db7255e2395c60c8                         0.0s
+ => => naming to quay.io/sher_chowdhury0/mysql-operator2-bundle:v0.0.1                                               0.0s
+
+$ make docker-push IMG=$BUNDLE_IMG
+
+docker push quay.io/sher_chowdhury0/mysql-operator2-bundle:v0.0.1
+The push refers to repository [quay.io/sher_chowdhury0/mysql-operator2-bundle]
+d02927543e04: Pushed 
+9f25142cbc88: Pushed 
+7fdabab67fdf: Pushed 
+v0.0.1: digest: sha256:aebdf842a4c5da68535a3fb9271e711820fe8f90422a265936ee66da26637ade size: 939 
+```
+
+This bundle image is specific to the version of the operator in question. When you install the operator into your namespace, the operator's catalogsource pod works out which bundle image you need, pulls down that bundle image and run's a pod-job with that bundle image. This job is what installs the operator into your namespace. by installing I mean, creating the serviceaccount, role, rolebinding, and deployment resources in your namespace. 
+
+
+Now you can test this bundle image by running:
+
+```
+operator-sdk run bundle $BUNDLE_IMG
 ```
 
 

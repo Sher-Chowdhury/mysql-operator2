@@ -757,3 +757,46 @@ INFO[0004] Operator "mysql-operator2" uninstalled
 ```
 
 
+Here's how to do a direct deployment (https://sdk.operatorframework.io/docs/building-operators/golang/quickstart/#direct-deployment)
+
+Note, I hit a bug, and had to do the following first:
+
+```
+$ oc adm policy add-scc-to-user privileged -z default -n mysql-operator2-system    # <operator-name>-system
+```
+
+Then ran:
+
+```
+$ echo $OPERATOR_IMG
+quay.io/sher_chowdhury0/mysql-operator2:v0.0.1
+$ make deploy IMG=$OPERATOR_IMG
+/Users/sherchowdhury/github/mysql-operator2/mysql-operator2/bin/controller-gen "crd:trivialVersions=true,preserveUnknownFields=false" rbac:roleName=manager-role webhook paths="./..." output:crd:artifacts:config=config/crd/bases
+cd config/manager && /Users/sherchowdhury/github/mysql-operator2/mysql-operator2/bin/kustomize edit set image controller=quay.io/sher_chowdhury0/mysql-operator2:v0.0.1
+/Users/sherchowdhury/github/mysql-operator2/mysql-operator2/bin/kustomize build config/default | kubectl apply -f -
+namespace/mysql-operator2-system created
+customresourcedefinition.apiextensions.k8s.io/mysqls.cache.codingbee.net created
+role.rbac.authorization.k8s.io/mysql-operator2-leader-election-role created
+clusterrole.rbac.authorization.k8s.io/mysql-operator2-manager-role created
+Warning: resource clusterroles/mysql-operator2-metrics-reader is missing the kubectl.kubernetes.io/last-applied-configuration annotation which is required by kubectl apply. kubectl apply should only be used on resources created declaratively by either kubectl create --save-config or kubectl apply. The missing annotation will be patched automatically.
+clusterrole.rbac.authorization.k8s.io/mysql-operator2-metrics-reader configured
+clusterrole.rbac.authorization.k8s.io/mysql-operator2-proxy-role created
+rolebinding.rbac.authorization.k8s.io/mysql-operator2-leader-election-rolebinding created
+clusterrolebinding.rbac.authorization.k8s.io/mysql-operator2-manager-rolebinding created
+clusterrolebinding.rbac.authorization.k8s.io/mysql-operator2-proxy-rolebinding created
+configmap/mysql-operator2-manager-config created
+service/mysql-operator2-controller-manager-metrics-service created
+deployment.apps/mysql-operator2-controller-manager created
+```
+
+This created the following namespace+resources:
+
+```
+$ oc get catalogsource,pods,deployments,role,rolebinding,serviceaccount | grep mysql
+pod/mysql-operator2-controller-manager-55668f9bb7-2lg2t   2/2     Running   0          3m31s
+deployment.apps/mysql-operator2-controller-manager   1/1     1            1           8m59s
+role.rbac.authorization.k8s.io/mysql-operator2-leader-election-role   2021-04-09T14:01:17Z
+rolebinding.rbac.authorization.k8s.io/mysql-operator2-leader-election-rolebinding   Role/mysql-operator2-leader-election-role     9m1s
+```
+
+It looks like this deploys the operator more directly, without any olm stuff, i.e. catalogsource and bundleimages aren't used here.  

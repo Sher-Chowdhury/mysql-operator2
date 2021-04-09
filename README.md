@@ -153,3 +153,51 @@ $ tree .
 ```
 
 (git commit no1)
+
+Next we define a new "kind", aka custom-resource. 
+
+```
+$ operator-sdk create api --group cache --version v1alpha1 --kind Mysql --resource --controller       # kinds need to start with an uppercase
+Writing scaffold for you to edit...
+api/v1alpha1/mysql_types.go
+controllers/mysql_controller.go
+Running make:
+$ make
+/Users/sherchowdhury/github/mysql-operator2/mysql-operator2/bin/controller-gen object:headerFile="hack/boilerplate.go.txt" paths="./..."
+go fmt ./...
+go vet ./...
+go build -o bin/manager main.go
+```
+
+Note, an operator can manage 1 or more CRDs, these CRDs are referred to as "APIs" as indicated in the above example.
+
+```
+git status
+On branch main
+Your branch is up to date with 'origin/main'.
+
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+        modified:   PROJECT
+        modified:   go.mod
+        modified:   main.go
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+        api/
+        config/crd/
+        config/rbac/mysql_editor_role.yaml
+        config/rbac/mysql_viewer_role.yaml
+        config/samples/
+        controllers/
+
+no changes added to commit (use "git add" and/or "git commit -a")
+```
+
+(git commit no2)
+
+
+
+
+

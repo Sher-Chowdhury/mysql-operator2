@@ -202,7 +202,6 @@ Now we can create our operator image (see https://sdk.operatorframework.io/docs/
 
 ```
 $ docker login quay.io -u sher.chowdhury@ibm.com -p xxxxxxxxx 
-$ # export USERNAME=sher_chowdhury0
 $ export OPERATOR_IMG="quay.io/sher_chowdhury0/mysql-operator2:v0.0.1"
 $ make docker-build docker-push IMG=$OPERATOR_IMG
 /Users/sherchowdhury/github/mysql-operator2/mysql-operator2/bin/controller-gen object:headerFile="hack/boilerplate.go.txt" paths="./..."
@@ -297,12 +296,11 @@ Untracked files:
 no changes added to commit (use "git add" and/or "git commit -a")
 
 
-╭(☸️ |default/api-vocable-cp-fyre-ibm-com:6443/kube:admin:default) sher  ~/github/mysql-operator2   main ●  
-╰➤ ls -l mysql-operator2/config/crd/bases/
+$ ls -l mysql-operator2/config/crd/bases/
 total 8
 -rw-r--r--  1 sherchowdhury  staff  1920  9 Apr 11:02 cache.codingbee.net_mysqls.yaml
-╭(☸️ |default/api-vocable-cp-fyre-ibm-com:6443/kube:admin:default) sher  ~/github/mysql-operator2   main ●  
-╰➤ cat mysql-operator2/config/crd/bases/cache.codingbee.net_mysqls.yaml
+
+$ cat mysql-operator2/config/crd/bases/cache.codingbee.net_mysqls.yaml
 
 ---
 apiVersion: apiextensions.k8s.io/v1
@@ -632,10 +630,80 @@ v0.0.1: digest: sha256:aebdf842a4c5da68535a3fb9271e711820fe8f90422a265936ee66da2
 This bundle image is specific to the version of the operator in question. When you install the operator into your namespace, the operator's catalogsource pod works out which bundle image you need, pulls down that bundle image and run's a pod-job with that bundle image. This job is what installs the operator into your namespace. by installing I mean, creating the serviceaccount, role, rolebinding, and deployment resources in your namespace. 
 
 
+Now in order to do the next part, go to the quay.io web console, and for each operator and bundle repo, go to repo's settings and make them public. 
+
+Now do `oc login ...` to log into your test cluster, and create a new project `oc new-project xxx`
+
+Note, I also had to do the following to get the next section working (otherwise an error shows when describing replicasets):
+
+
+```
+oc adm policy add-scc-to-user privileged -z default -n YOUR-NAMESPACE
+```
+
+
 Now you can test this bundle image by running:
 
 ```
-operator-sdk run bundle $BUNDLE_IMG
+$ echo $BUNDLE_IMG                                                      
+quay.io/sher_chowdhury0/mysql-operator2-bundle:v0.0.1
+$ operator-sdk run bundle $BUNDLE_IMG
+INFO[0017] Successfully created registry pod: quay-io-sher-chowdhury0-mysql-operator2-bundle-v0-0-1 
+INFO[0017] Created CatalogSource: mysql-operator2-catalog 
+INFO[0018] OperatorGroup "operator-sdk-og" created      
+INFO[0018] Created Subscription: mysql-operator2-v0-0-1-sub 
+INFO[0022] Approved InstallPlan install-wgfx4 for the Subscription: mysql-operator2-v0-0-1-sub 
+INFO[0023] Waiting for ClusterServiceVersion "ace-sher2/mysql-operator2.v0.0.1" to reach 'Succeeded' phase 
+INFO[0024]   Waiting for ClusterServiceVersion "ace-sher2/mysql-operator2.v0.0.1" to appear 
+INFO[0037]   Found ClusterServiceVersion "ace-sher2/mysql-operator2.v0.0.1" phase: Pending 
+INFO[0039]   Found ClusterServiceVersion "ace-sher2/mysql-operator2.v0.0.1" phase: InstallReady 
+INFO[0040]   Found ClusterServiceVersion "ace-sher2/mysql-operator2.v0.0.1" phase: Installing 
+INFO[0048]   Found ClusterServiceVersion "ace-sher2/mysql-operator2.v0.0.1" phase: Succeeded 
+INFO[0048] OLM has successfully installed "mysql-operator2.v0.0.1" 
+```
+
+This ended up creating:
+
+```
+$ oc get catalogsource,pods,deployments,role,rolebinding,serviceaccount | grep mysql
+catalogsource.operators.coreos.com/mysql-operator2-catalog   mysql-operator2   grpc   operator-sdk   4m29s
+pod/mysql-operator2-controller-manager-675764c59d-hhs8f               2/2     Running     0          3m54s
+pod/quay-io-sher-chowdhury0-mysql-operator2-bundle-v0-0-1             1/1     Running     0          4m26s
+deployment.apps/mysql-operator2-controller-manager   1/1     1            1           3m54s
+role.rbac.authorization.k8s.io/mysql-operator2.v0.0.1                                            2021-04-09T13:31:29Z
+role.rbac.authorization.k8s.io/mysql-operator2.v0.0.1-default-6864f55b5d                         2021-04-09T13:31:30Z
+rolebinding.rbac.authorization.k8s.io/mysql-operator2.v0.0.1                                            Role/mysql-operator2.v0.0.1                                            3m57s
+rolebinding.rbac.authorization.k8s.io/mysql-operator2.v0.0.1-default-6864f55b5d                         Role/mysql-operator2.v0.0.1-default-6864f55b5d                         3m55s
 ```
 
 
+
+It also created:
+
+```
+$ oc get jobs
+NAME                                                              COMPLETIONS   DURATION   AGE
+ab6564ddccbd77495d1ac29273ebd7208d3725ff3d1e04ed662e41e0a2936fa   1/1           16s        4m55s
+```
+
+This job used the bundle image for one of it's init containers. 
+
+
+The 2 pods that are created, one relates to the catalogsource, and the other is the controller pod:
+
+```
+$ oc get pods
+NAME                                                              READY   STATUS      RESTARTS   AGE
+ab6564ddccbd77495d1ac29273ebd7208d3725ff3d1e04ed662e41e0a2h9mmt   0/1     Completed   0          8m22s (job created this pod)
+mysql-operator2-controller-manager-675764c59d-hhs8f               2/2     Running     0          8m4s   <== controller pod
+quay-io-sher-chowdhury0-mysql-operator2-bundle-v0-0-1             1/1     Running     0          8m36s  <== catalogsource
+```
+
+
+It also created the crd:
+
+```
+$ oc get crds mysqls.cache.codingbee.net
+NAME                         CREATED AT
+mysqls.cache.codingbee.net   2021-04-09T13:16:43Z
+```

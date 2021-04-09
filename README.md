@@ -366,7 +366,34 @@ status:
 (git commit no 3)
 
 
+Side note, to check if olm is installed on your cluster, first log into your cluster, then run:
 
+```
+$ operator-sdk olm status --olm-namespace=openshift-operator-lifecycle-manager
+INFO[0004] Fetching CRDs for version "0.17.0"
+INFO[0004] Using locally stored resource manifests
+INFO[0008] Successfully got OLM status for version "0.17.0"
+
+NAME                                            NAMESPACE    KIND                        STATUS
+operators.operators.coreos.com                               CustomResourceDefinition    Installed
+operatorgroups.operators.coreos.com                          CustomResourceDefinition    Installed
+installplans.operators.coreos.com                            CustomResourceDefinition    Installed
+clusterserviceversions.operators.coreos.com                  CustomResourceDefinition    Installed
+subscriptions.operators.coreos.com                           CustomResourceDefinition    Installed
+system:controller:operator-lifecycle-manager                 ClusterRole                 Installed
+aggregate-olm-edit                                           ClusterRole                 Installed
+aggregate-olm-view                                           ClusterRole                 Installed
+catalogsources.operators.coreos.com                          CustomResourceDefinition    Installed
+olm                                                          Namespace                   namespaces "olm" not found
+olm-operator-binding-olm                                     ClusterRoleBinding          clusterrolebindings.rbac.authorization.k8s.io "olm-operator-binding-olm" not found
+olm-operator                                    olm          Deployment                  deployments.apps "olm-operator" not found
+catalog-operator                                olm          Deployment                  deployments.apps "catalog-operator" not found
+olm-operator-serviceaccount                     olm          ServiceAccount              serviceaccounts "olm-operator-serviceaccount" not found
+operators                                                    Namespace                   namespaces "operators" not found
+global-operators                                operators    OperatorGroup               operatorgroups.operators.coreos.com "global-operators" not found
+olm-operators                                   olm          OperatorGroup               operatorgroups.operators.coreos.com "olm-operators" not found
+packageserver                                   olm          ClusterServiceVersion       clusterserviceversions.operators.coreos.com "packageserver" not found
+```
 
 
 

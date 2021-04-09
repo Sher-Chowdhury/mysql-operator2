@@ -699,6 +699,30 @@ mysql-operator2-controller-manager-675764c59d-hhs8f               2/2     Runnin
 quay-io-sher-chowdhury0-mysql-operator2-bundle-v0-0-1             1/1     Running     0          8m36s  <== catalogsource
 ```
 
+Since this is just for testing, all these pods are using the `default` service account:
+
+```
+$ oc get pods mysql-operator2-controller-manager-675764c59d-hhs8f -o json | jq '.spec.serviceAccount'
+"default"
+$ oc get pods quay-io-sher-chowdhury0-mysql-operator2-bundle-v0-0-1 -o json | jq '.spec.serviceAccount'
+"default"
+$ oc get pods ab6564ddccbd77495d1ac29273ebd7208d3725ff3d1e04ed662e41e0a2h9mmt -o json | jq '.spec.serviceAccount'
+"default"
+```
+
+Hence why a mysql specific serviceaccount wasn't created. the default serviceaacount is assigned with thmy mysql-related-cr privileges via the rolebindings:
+
+```
+$ oc get rolebindings mysql-operator2.v0.0.1-default-6864f55b5d -o wide
+NAME                                        ROLE                                             AGE   USERS   GROUPS   SERVICEACCOUNTS
+mysql-operator2.v0.0.1-default-6864f55b5d   Role/mysql-operator2.v0.0.1-default-6864f55b5d   20m                    ace-sher2/default
+
+$ oc get rolebindings mysql-operator2.v0.0.1 -o wide
+NAME                     ROLE                          AGE   USERS   GROUPS   SERVICEACCOUNTS
+mysql-operator2.v0.0.1   Role/mysql-operator2.v0.0.1   22m                    /default, /default
+```
+
+Not sure why we have 2 rolebindings here though. 
 
 It also created the crd:
 
@@ -707,3 +731,29 @@ $ oc get crds mysqls.cache.codingbee.net
 NAME                         CREATED AT
 mysqls.cache.codingbee.net   2021-04-09T13:16:43Z
 ```
+
+Now I can create a mysql cr (https://sdk.operatorframework.io/docs/building-operators/golang/quickstart/):
+
+```
+$ oc apply -f mysql-operator2/config/samples/cache_v1alpha1_mysql.yaml 
+mysql.cache.codingbee.net/mysql-sample created
+
+$ oc get mysql
+NAME           AGE
+mysql-sample   12m
+```
+
+To delete your test run, do (https://sdk.operatorframework.io/docs/building-operators/golang/quickstart/):
+
+```
+$ operator-sdk cleanup mysql-operator2   
+
+INFO[0002] subscription "mysql-operator2-v0-0-1-sub" deleted 
+INFO[0002] customresourcedefinition "mysqls.cache.codingbee.net" deleted 
+INFO[0003] clusterserviceversion "mysql-operator2.v0.0.1" deleted 
+INFO[0003] catalogsource "mysql-operator2-catalog" deleted 
+INFO[0004] operatorgroup "operator-sdk-og" deleted      
+INFO[0004] Operator "mysql-operator2" uninstalled       
+```
+
+

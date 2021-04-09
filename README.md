@@ -395,6 +395,203 @@ olm-operators                                   olm          OperatorGroup      
 packageserver                                   olm          ClusterServiceVersion       clusterserviceversions.operators.coreos.com "packageserver" not found
 ```
 
+olm is a bit like kubernete's version of a package manager, e.g. like yum, dnf, pip...etc, but for kubernetes. Olm is installed by default on openshift clusters. 
 
+Next we create the bundle image for our operator (https://sdk.operatorframework.io/docs/building-operators/golang/quickstart/):
+
+```
+make bundle IMG=$OPERATOR_IMG
+
+/Users/sherchowdhury/github/mysql-operator2/mysql-operator2/bin/controller-gen "crd:trivialVersions=true,preserveUnknownFields=false" rbac:roleName=manager-role webhook paths="./..." output:crd:artifacts:config=config/crd/bases
+go: creating new go.mod: module tmp
+Downloading sigs.k8s.io/kustomize/kustomize/v3@v3.8.7
+go: downloading sigs.k8s.io/kustomize/kustomize/v3 v3.8.7
+go: downloading sigs.k8s.io/kustomize/api v0.6.5
+go: downloading sigs.k8s.io/kustomize/cmd/config v0.8.5
+go: downloading k8s.io/client-go v0.18.10
+go: downloading sigs.k8s.io/kustomize/kyaml v0.9.4
+go: downloading k8s.io/apimachinery v0.18.10
+go: downloading github.com/hashicorp/go-multierror v1.1.0
+go: downloading github.com/monochromegane/go-gitignore v0.0.0-20200626010858-205db1a8cc00
+go: downloading k8s.io/kube-openapi v0.0.0-20200410145947-61e04a5be9a6
+go: downloading github.com/yujunz/go-getter v1.4.1-lite
+go: downloading go.starlark.net v0.0.0-20200306205701-8dd3e2ee1dd5
+go: downloading golang.org/x/net v0.0.0-20200625001655-4c5254603344
+go: downloading github.com/qri-io/starlib v0.4.2-0.20200213133954-ff2e8cd5ef8d
+go: downloading github.com/go-openapi/strfmt v0.19.5
+go: downloading k8s.io/api v0.18.10
+go: downloading github.com/go-openapi/validate v0.19.8
+go: downloading go.mongodb.org/mongo-driver v1.1.2
+go: downloading github.com/hashicorp/go-version v1.1.0
+go: downloading github.com/hashicorp/go-safetemp v1.0.0
+go: downloading github.com/mitchellh/go-testing-interface v1.0.0
+go: downloading github.com/asaskevich/govalidator v0.0.0-20190424111038-f61b66f89f4a
+go: downloading github.com/go-openapi/errors v0.19.2
+go: downloading github.com/ulikunitz/xz v0.5.5
+go: downloading github.com/bgentry/go-netrc v0.0.0-20140422174119-9fd32a8b3d3d
+go: downloading github.com/hashicorp/go-cleanhttp v0.5.0
+go: downloading github.com/go-openapi/analysis v0.19.5
+go: downloading github.com/go-openapi/runtime v0.19.4
+go: downloading golang.org/x/sys v0.0.0-20200323222414-85ca7c5b95cd
+go: downloading github.com/go-stack/stack v1.8.0
+go: downloading github.com/go-openapi/loads v0.19.4
+operator-sdk generate kustomize manifests -q
+
+Display name for the operator (required): 
+> mysql
+
+Description for the operator (required): 
+> install mysql dbs
+
+Provider's name for the operator (required): 
+> mysqlprovider
+
+Any relevant URL for the provider name (optional): 
+>       
+
+Comma-separated list of keywords for your operator (required): 
+> db,mysql
+
+Comma-separated list of maintainers and their emails (e.g. 'name1:email1, name2:email2') (required): 
+> sher.chowdhury@ibm.com
+cd config/manager && /Users/sherchowdhury/github/mysql-operator2/mysql-operator2/bin/kustomize edit set image controller=quay.io/sher_chowdhury0/mysql-operator2:v0.0.1
+/Users/sherchowdhury/github/mysql-operator2/mysql-operator2/bin/kustomize build config/manifests | operator-sdk generate bundle -q --overwrite --version 0.0.1  
+INFO[0000] Building annotations.yaml                    
+INFO[0000] Writing annotations.yaml in /Users/sherchowdhury/github/mysql-operator2/mysql-operator2/bundle/metadata 
+INFO[0000] Building Dockerfile                          
+INFO[0000] Writing bundle.Dockerfile in /Users/sherchowdhury/github/mysql-operator2/mysql-operator2 
+operator-sdk bundle validate ./bundle
+INFO[0000] Found annotations file                        bundle-dir=bundle container-tool=docker
+INFO[0000] Could not find optional dependencies file     bundle-dir=bundle container-tool=docker
+INFO[0000] All validation tests have completed successfully 
+```
+
+This created the following:
+
+```
+$ git status
+On branch main
+Your branch is up to date with 'origin/main'.
+
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+        modified:   config/manager/kustomization.yaml
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+        bundle.Dockerfile
+        bundle/
+        config/manifests/
+
+no changes added to commit (use "git add" and/or "git commit -a")
+```
+
+This is the point where the clusterserviceversion.yaml got created:
+
+```
+$ cat config/manifests/bases/mysql-operator2.clusterserviceversion.yaml 
+apiVersion: operators.coreos.com/v1alpha1
+kind: ClusterServiceVersion
+metadata:
+  annotations:
+    alm-examples: '[]'
+    capabilities: Basic Install
+  name: mysql-operator2.v0.0.0
+  namespace: placeholder
+spec:
+  apiservicedefinitions: {}
+  customresourcedefinitions:
+    owned:
+    - description: Mysql is the Schema for the mysqls API
+      displayName: Mysql
+      kind: Mysql
+      name: mysqls.cache.codingbee.net
+      version: v1alpha1
+  description: install mysql dbs
+  displayName: mysql
+  icon:
+  - base64data: ""
+    mediatype: ""
+  install:
+    spec:
+      deployments: null
+    strategy: ""
+  installModes:
+  - supported: false
+    type: OwnNamespace
+  - supported: false
+    type: SingleNamespace
+  - supported: false
+    type: MultiNamespace
+  - supported: true
+    type: AllNamespaces
+  keywords:
+  - db
+  - mysql
+  links:
+  - name: Mysql Operator2
+    url: https://mysql-operator2.domain
+  maturity: alpha
+  provider:
+    name: mysqlprovider
+  version: 0.0.0
+```
+
+Also the following looks interesting too:
+
+```
+$ cat config/manager/kustomization.yaml 
+resources:
+- manager.yaml
+
+generatorOptions:
+  disableNameSuffixHash: true
+
+configMapGenerator:
+- files:
+  - controller_manager_config.yaml
+  name: manager-config
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+images:
+- name: controller
+  newName: quay.io/sher_chowdhury0/mysql-operator2
+  newTag: v0.0.1
+```
+
+There's also this file too:
+
+```
+$ tree config/manifests                
+config/manifests
+├── bases
+│   └── mysql-operator2.clusterserviceversion.yaml
+└── kustomization.yaml
+
+1 directory, 2 files
+
+$ cat config/manifests/kustomization.yaml 
+resources:
+- ../default
+- ../samples
+- ../scorecard
+```
+
+These paths seems to refer to:
+
+```
+$ ls -l config
+total 0
+drwx------   5 sherchowdhury  staff  160  9 Apr 10:31 certmanager
+drwx------   6 sherchowdhury  staff  192  9 Apr 11:02 crd
+drwx------   5 sherchowdhury  staff  160  9 Apr 10:31 default              <==
+drwx------   5 sherchowdhury  staff  160  9 Apr 10:31 manager
+drwxr-xr-x   4 sherchowdhury  staff  128  9 Apr 13:03 manifests
+drwx------   4 sherchowdhury  staff  128  9 Apr 10:31 prometheus
+drwx------  13 sherchowdhury  staff  416  9 Apr 11:02 rbac
+drwx------   4 sherchowdhury  staff  128  9 Apr 10:44 samples              <==
+drwxr-xr-x   5 sherchowdhury  staff  160  9 Apr 10:31 scorecard            <==
+```
 
 

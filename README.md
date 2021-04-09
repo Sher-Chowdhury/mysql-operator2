@@ -47,8 +47,7 @@ The output is:
 ```
 $ mkdir mysql-operator2
 $ cd mysql-operator2 
-╭(☸️ |default/api-vocable-cp-fyre-ibm-com:6443/kube:admin:default) sher  ~/github/mysql-operator2/mysql-operator2   main  
-╰➤ operator-sdk init --domain codingbee.net --repo github.com/Sher-Chowdhury/mysql-operator2
+$ operator-sdk init --domain codingbee.net --repo github.com/Sher-Chowdhury/mysql-operator2
 Writing scaffold for you to edit...
 Get controller runtime:
 $ go get sigs.k8s.io/controller-runtime@v0.7.0

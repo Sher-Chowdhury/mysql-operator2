@@ -95,6 +95,8 @@ Next: define a resource with:
 $ operator-sdk create api
 ```
 
+For more info, see - https://sdk.operatorframework.io/docs/building-operators/golang/tutorial/
+
 This created:
 
 ```
@@ -157,20 +159,100 @@ Next we define a new "kind", aka custom-resource.
 
 ```
 $ operator-sdk create api --group cache --version v1alpha1 --kind Mysql --resource --controller       # kinds need to start with an uppercase
-Writing scaffold for you to edit...
-api/v1alpha1/mysql_types.go
-controllers/mysql_controller.go
-Running make:
-$ make
-/Users/sherchowdhury/github/mysql-operator2/mysql-operator2/bin/controller-gen object:headerFile="hack/boilerplate.go.txt" paths="./..."
-go fmt ./...
-go vet ./...
-go build -o bin/manager main.go
+  Writing scaffold for you to edit...
+  api/v1alpha1/mysql_types.go
+  controllers/mysql_controller.go
+  Running make:
+  $ make
+  /Users/sherchowdhury/github/mysql-operator2/mysql-operator2/bin/controller-gen object:headerFile="hack/boilerplate.go.txt" paths="./..."
+  go fmt ./...
+  go vet ./...
+  go build -o bin/manager main.go
 ```
 
-Note, an operator can manage 1 or more CRDs, these CRDs are referred to as "APIs" as indicated in the above example.
+Note, an operator can manage 1 or more CRDs, these CRDs are referred to as "APIs" as indicated in the above example. In this example we created
+the kind "mysql" but maybe we can generate other secondary-like crds, e.g. `mysqlconfig` and `mysqllogincreds`. 
 
 see:  https://sdk.operatorframework.io/docs/building-operators/golang/quickstart/
+
+Also see: https://sdk.operatorframework.io/docs/building-operators/golang/tutorial/#create-a-new-api-and-controller
+
+
+The above command created the following  file:
+
+```
+$ cat api/v1alpha1/mysql_types.go
+/*
+Copyright 2021.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
+package v1alpha1
+
+import (
+        metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+)
+
+// EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
+// NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
+
+// MysqlSpec defines the desired state of Mysql
+type MysqlSpec struct {
+        // INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
+        // Important: Run "make" to regenerate code after modifying this file
+
+        // Foo is an example field of Mysql. Edit Mysql_types.go to remove/update
+        Foo string `json:"foo,omitempty"`
+}
+
+// MysqlStatus defines the observed state of Mysql
+type MysqlStatus struct {
+        // INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
+        // Important: Run "make" to regenerate code after modifying this file
+}
+
+// +kubebuilder:object:root=true
+// +kubebuilder:subresource:status
+
+// Mysql is the Schema for the mysqls API
+type Mysql struct {
+        metav1.TypeMeta   `json:",inline"`
+        metav1.ObjectMeta `json:"metadata,omitempty"`
+
+        Spec   MysqlSpec   `json:"spec,omitempty"`
+        Status MysqlStatus `json:"status,omitempty"`
+}
+
+// +kubebuilder:object:root=true
+
+// MysqlList contains a list of Mysql
+type MysqlList struct {
+        metav1.TypeMeta `json:",inline"`
+        metav1.ListMeta `json:"metadata,omitempty"`
+        Items           []Mysql `json:"items"`
+}
+
+func init() {
+        SchemeBuilder.Register(&Mysql{}, &MysqlList{})
+}
+```
+
+This file is used to define your CRD's structure. 
+
+The crd file itself will live in `config/crd/bases/cache.codingbee.net_mysqls.yaml`. But you don't edit crd files directly, instead you edit the corresponding *_types.go file (e.g. api/v1alpha1/mysql_types.go) and then run the `make generate` command to it generated for you. 
+
+The `mysql-operator2/controllers/mysql_controller.go` contains the code that is run to create to create the necessary child resources of a given CR. 
 
 ```
 git status
@@ -800,3 +882,29 @@ rolebinding.rbac.authorization.k8s.io/mysql-operator2-leader-election-rolebindin
 ```
 
 It looks like this deploys the operator more directly, without any olm stuff, i.e. catalogsource and bundleimages aren't used here.  
+
+To delete everything again:
+
+```
+$ make undeploy                
+/Users/sherchowdhury/github/mysql-operator2/mysql-operator2/bin/kustomize build config/default | kubectl delete -f -
+namespace "mysql-operator2-system" deleted
+customresourcedefinition.apiextensions.k8s.io "mysqls.cache.codingbee.net" deleted
+role.rbac.authorization.k8s.io "mysql-operator2-leader-election-role" deleted
+clusterrole.rbac.authorization.k8s.io "mysql-operator2-manager-role" deleted
+clusterrole.rbac.authorization.k8s.io "mysql-operator2-metrics-reader" deleted
+clusterrole.rbac.authorization.k8s.io "mysql-operator2-proxy-role" deleted
+rolebinding.rbac.authorization.k8s.io "mysql-operator2-leader-election-rolebinding" deleted
+clusterrolebinding.rbac.authorization.k8s.io "mysql-operator2-manager-rolebinding" deleted
+clusterrolebinding.rbac.authorization.k8s.io "mysql-operator2-proxy-rolebinding" deleted
+configmap "mysql-operator2-manager-config" deleted
+service "mysql-operator2-controller-manager-metrics-service" deleted
+deployment.apps "mysql-operator2-controller-manager" deleted
+```
+
+
+## Indepth tutorial 
+(https://sdk.operatorframework.io/docs/building-operators/golang/tutorial/)
+
+
+

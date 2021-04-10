@@ -998,6 +998,26 @@ spec:
 
 (git commit no5)
 
+Mow apply our changes:
+
 ```
-make generate
+$ make generate
+/Users/sherchowdhury/github/mysql-operator2/mysql-operator2/bin/controller-gen object:headerFile="hack/boilerplate.go.txt" paths="./..."
 ```
+
+This makes some internal changes:
+
+```
+git status
+On branch main
+Your branch is up to date with 'origin/main'.
+
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+        modified:   api/v1alpha1/zz_generated.deepcopy.go
+
+no changes added to commit (use "git add" and/or "git commit -a")
+```
+
+(git commit no6)

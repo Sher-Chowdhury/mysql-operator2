@@ -1029,4 +1029,19 @@ $ make manifests
 /Users/sherchowdhury/github/mysql-operator2/mysql-operator2/bin/controller-gen "crd:trivialVersions=true,preserveUnknownFields=false" rbac:roleName=manager-role webhook paths="./..." output:crd:artifacts:config=config/crd/bases
 ```
 
+This updates the crd:
 
+```
+$ git status
+On branch main
+Your branch is up to date with 'origin/main'.
+
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+        modified:   config/crd/bases/cache.codingbee.net_mysqls.yaml
+
+no changes added to commit (use "git add" and/or "git commit -a")
+```
+
+(git commit no7)

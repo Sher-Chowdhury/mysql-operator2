@@ -907,4 +907,7 @@ deployment.apps "mysql-operator2-controller-manager" deleted
 (https://sdk.operatorframework.io/docs/building-operators/golang/tutorial/)
 
 
+At the moment, our CR doesn't do anything i.e. it doesn't create any child resources, such as pods, secrets,...etc. 
+
+
 

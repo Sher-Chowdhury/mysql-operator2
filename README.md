@@ -977,6 +977,8 @@ Now I want to add a new `mysqls.spec.environment` setting. This setting in turn 
 - mysql_user
 - mysql_password
 
+(These relates to: https://hub.docker.com/_/mysql#Environment_Variables)
+
 So that our cr can look something like:
 
 ```
@@ -993,3 +995,6 @@ spec:
     mysql_user: admin
     mysql_password: xxxx
 ```
+
+(git commit no5)
+

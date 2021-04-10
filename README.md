@@ -1025,5 +1025,8 @@ no changes added to commit (use "git add" and/or "git commit -a")
 Now we update our crd:
 
 ```
-$ make manifest
+$ make manifests
+/Users/sherchowdhury/github/mysql-operator2/mysql-operator2/bin/controller-gen "crd:trivialVersions=true,preserveUnknownFields=false" rbac:roleName=manager-role webhook paths="./..." output:crd:artifacts:config=config/crd/bases
 ```
+
+

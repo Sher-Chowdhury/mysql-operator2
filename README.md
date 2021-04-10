@@ -998,6 +998,9 @@ spec:
 
 (git commit no5)
 
+Background info about Go struct tags - https://medium.com/@sher-chowdhury/struct-tags-in-go-ca05c09d4249
+
+
 Mow apply our changes:
 
 ```

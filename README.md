@@ -1021,3 +1021,9 @@ no changes added to commit (use "git add" and/or "git commit -a")
 ```
 
 (git commit no6)
+
+Now we update our crd:
+
+```
+$ make manifest
+```

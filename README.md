@@ -568,6 +568,8 @@ Untracked files:
 no changes added to commit (use "git add" and/or "git commit -a")
 ```
 
+(git commit no4)
+
 This is the point where the clusterserviceversion.yaml got created:
 
 ```

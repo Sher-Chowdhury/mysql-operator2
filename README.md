@@ -909,5 +909,85 @@ deployment.apps "mysql-operator2-controller-manager" deleted
 
 At the moment, our CR doesn't do anything i.e. it doesn't create any child resources, such as pods, secrets,...etc. 
 
+At the moment our operator only manages one type of crd, called:
+
+```
+$ oc get crds mysqls.cache.codingbee.net        
+NAME                         CREATED AT
+mysqls.cache.codingbee.net   2021-04-10T13:29:15Z
+```
+
+Operator-sdk provided this initial boiler-plate structure for this crd:
 
 
+
+```
+$ oc explain mysql --recursive 
+KIND:     Mysql
+VERSION:  cache.codingbee.net/v1alpha1
+
+DESCRIPTION:
+     Mysql is the Schema for the mysqls API
+
+FIELDS:
+   apiVersion   <string>
+   kind <string>
+   metadata     <Object>
+      annotations       <map[string]string>
+      clusterName       <string>
+      creationTimestamp <string>
+      deletionGracePeriodSeconds        <integer>
+      deletionTimestamp <string>
+      finalizers        <[]string>
+      generateName      <string>
+      generation        <integer>
+      labels    <map[string]string>
+      managedFields     <[]Object>
+         apiVersion     <string>
+         fieldsType     <string>
+         fieldsV1       <map[string]>
+         manager        <string>
+         operation      <string>
+         time   <string>
+      name      <string>
+      namespace <string>
+      ownerReferences   <[]Object>
+         apiVersion     <string>
+         blockOwnerDeletion     <boolean>
+         controller     <boolean>
+         kind   <string>
+         name   <string>
+         uid    <string>
+      resourceVersion   <string>
+      selfLink  <string>
+      uid       <string>
+   spec <Object>
+      foo       <string>
+   status       <map[string]>
+```
+
+Under `mysqls.spec` we are provided with a single dummy setting `foo`. 
+
+Now I want to add a new `mysqls.spec.environment` setting. This setting in turn will store these 4 key-values pairs:
+
+- mysql_root_password
+- mysql_database
+- mysql_user
+- mysql_password
+
+So that our cr can look something like:
+
+```
+apiVersion: cache.codingbee.net/v1alpha1
+kind: Mysql
+metadata:
+  name: mysql-sample
+spec:
+  # Add fields here
+  foo: bar
+  environment:
+    mysql_root_password: xxxxxx
+    mysql_database: wordpressDB
+    mysql_user: admin
+    mysql_password: xxxx
+```

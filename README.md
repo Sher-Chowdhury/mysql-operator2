@@ -1008,7 +1008,9 @@ spec:
     mysql_password: xxxx
 ```
 
-(git commit no5)
+To implement we updated the mysql_types.go file (git commit no5). 
+
+Note: You can't write any comments in *_types.go because comments have special meaning in this file. 
 
 Background info about Go struct tags - https://medium.com/@sher-chowdhury/struct-tags-in-go-ca05c09d4249
 

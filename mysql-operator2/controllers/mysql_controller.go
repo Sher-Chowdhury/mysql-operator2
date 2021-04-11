@@ -18,11 +18,14 @@ package controllers
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/go-logr/logr"
+	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	cachev1alpha1 "github.com/Sher-Chowdhury/mysql-operator2/api/v1alpha1"
 )
@@ -51,6 +54,28 @@ func (r *MysqlReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
 	_ = r.Log.WithValues("mysql", req.NamespacedName)
 
 	// your logic here
+
+	// Fetch the MySQL CR's yaml data. 
+
+	// First, create an empty variable that will hold the MySQL CR's yaml data
+	instance := &cachev1alpha1.Mysql{}
+
+	// Second, use the Client.Get method to populate the 'instance' variable
+	err := r.Client.Get(context.TODO(), req.NamespacedName, instance)
+	if err != nil {
+		if errors.IsNotFound(err) {
+			// Request object not found, could have been deleted after reconcile request.
+			// Owned objects are automatically garbage collected. For additional cleanup logic use finalizers.
+			// Return and don't requeue
+			return reconcile.Result{}, nil
+		}
+		// Error reading the object - requeue the request.
+		return reconcile.Result{}, err
+	}
+	// debugging: this should print out the mysql CR's yaml data:
+	fmt.Println(instance)
+
+	
 
 	return ctrl.Result{}, nil
 }

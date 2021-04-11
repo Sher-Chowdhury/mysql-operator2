@@ -5,3 +5,8 @@ metadata:
 spec:
   # Add fields here
   foo: bar
+  environment:
+    mysql_root_password: xxxxxx
+    mysql_database: wordpressDB
+    mysql_user: admin
+    mysql_password: xxxx

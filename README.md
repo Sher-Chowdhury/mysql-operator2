@@ -712,6 +712,15 @@ docker build -f bundle.Dockerfile -t quay.io/sher_chowdhury0/mysql-operator2-bun
  => => exporting layers                                                                                              0.0s
  => => writing image sha256:92526e73c1cca5140b8c6113be4d9dbb05cb797eef6ce0d7db7255e2395c60c8                         0.0s
  => => naming to quay.io/sher_chowdhury0/mysql-operator2-bundle:v0.0.1                                               0.0s
+```
+
+This updates the `bundle/manifests/cache.codingbee.net_mysqls.yaml` file to reflect any crd changes. 
+
+
+Now push up the bundle image:
+
+```
+
 
 $ make docker-push IMG=$BUNDLE_IMG
 
@@ -914,6 +923,36 @@ clusterrolebinding.rbac.authorization.k8s.io "mysql-operator2-proxy-rolebinding"
 configmap "mysql-operator2-manager-config" deleted
 service "mysql-operator2-controller-manager-metrics-service" deleted
 deployment.apps "mysql-operator2-controller-manager" deleted
+```
+
+
+Another way to test code changes more quickly is to do:
+
+```
+$ oc apply -f config/crd/bases/cache.codingbee.net_mysqls.yaml  
+customresourcedefinition.apiextensions.k8s.io/mysqls.cache.codingbee.net created
+
+
+$ make run                                                    
+/Users/sherchowdhury/github/mysql-operator2/mysql-operator2/bin/controller-gen object:headerFile="hack/boilerplate.go.txt" paths="./..."
+go fmt ./...
+go vet ./...
+/Users/sherchowdhury/github/mysql-operator2/mysql-operator2/bin/controller-gen "crd:trivialVersions=true,preserveUnknownFields=false" rbac:roleName=manager-role webhook paths="./..." output:crd:artifacts:config=config/crd/bases
+go run ./main.go
+I0411 15:33:21.425894   29646 request.go:645] Throttling request took 1.000815463s, request: GET:https://api.locate.cp.fyre.ibm.com:6443/apis/admissionregistration.k8s.io/v1beta1?timeout=32s
+2021-04-11T15:33:23.212+0100    INFO    controller-runtime.metrics      metrics server is starting to listen    {"addr": ":8080"}
+2021-04-11T15:33:23.213+0100    INFO    setup   starting manager
+2021-04-11T15:33:23.213+0100    INFO    controller-runtime.manager      starting metrics server {"path": "/metrics"}
+2021-04-11T15:33:23.213+0100    INFO    controller-runtime.manager.controller.mysql     Starting EventSource    {"reconciler group": "cache.codingbee.net", "reconciler kind": "Mysql", "source": "kind source: /, Kind="}
+2021-04-11T15:33:23.518+0100    INFO    controller-runtime.manager.controller.mysql     Starting Controller     {"reconciler group": "cache.codingbee.net", "reconciler kind": "Mysql"}
+2021-04-11T15:33:23.518+0100    INFO    controller-runtime.manager.controller.mysql     Starting workers        {"reconciler group": "cache.codingbee.net", "reconciler kind": "Mysql", "worker count": 1}
+.
+.
+.
+.
+.
+.
+...etc
 ```
 
 

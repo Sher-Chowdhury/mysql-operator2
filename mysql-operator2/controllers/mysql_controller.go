@@ -21,10 +21,13 @@ import (
 	"fmt"
 
 	"github.com/go-logr/logr"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	cachev1alpha1 "github.com/Sher-Chowdhury/mysql-operator2/api/v1alpha1"
@@ -84,6 +87,37 @@ func (r *MysqlReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
 	// debugging: this should print out the mysql pod def that we're going to build:
 	fmt.Println("New pod definition that will be used to create a new pod:")
 	fmt.Println(pod)
+
+	// Set MySQL Cr as the owner of this pod definition (so that this pod will get deleted if the CR is deleted)
+	if err := controllerutil.SetControllerReference(instance, pod, r.Scheme); err != nil {
+		return reconcile.Result{}, err
+	}
+
+	// Create an empty pod variable, which will be populated with pod data, if a match is found.
+	found := &corev1.Pod{}
+
+	// populate the "found" with a match (if a match is found)
+	// if a match is not found, then we get an error, which get's captured in 'err'
+	err = r.Client.Get(context.TODO(), types.NamespacedName{Name: pod.Name, Namespace: pod.Namespace}, found)
+
+	// if we get an error of the time "IsNotFound" then proceed with running the "oc create" command.
+	if err != nil && errors.IsNotFound(err) {
+
+		// This create line is essentially doing the "oc create" command.
+		err = r.Client.Create(context.TODO(), pod)
+		if err != nil {
+			return reconcile.Result{}, err
+		}
+
+		// Pod created successfully - don't requeue
+		// return reconcile.Result{}, nil    // I don't think this line is needed. 
+		fmt.Println("The following pod is now created: " + pod.Name)
+
+	} else if err != nil {
+		// if instead we get some other kind of error then raise it as an actual error.
+		return reconcile.Result{}, err
+	}
+
 
 	return ctrl.Result{}, nil
 }

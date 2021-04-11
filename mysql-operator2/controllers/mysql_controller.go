@@ -28,6 +28,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	cachev1alpha1 "github.com/Sher-Chowdhury/mysql-operator2/api/v1alpha1"
+	pod "github.com/Sher-Chowdhury/mysql-operator2/resources/pod"
 )
 
 // MysqlReconciler reconciles a Mysql object
@@ -55,7 +56,7 @@ func (r *MysqlReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
 
 	// your logic here
 
-	// Fetch the MySQL CR's yaml data. 
+	// Fetch the MySQL CR's yaml data.
 
 	// First, create an empty variable that will hold the MySQL CR's yaml data
 	instance := &cachev1alpha1.Mysql{}
@@ -73,9 +74,16 @@ func (r *MysqlReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
 		return reconcile.Result{}, err
 	}
 	// debugging: this should print out the mysql CR's yaml data:
+	fmt.Println("mysql cr data:")
 	fmt.Println(instance)
 
-	
+	// Define a new Pod object. This is the equivalent of writing a pod yaml file, but not applying it yet.
+	var mysql_pod = pod.MysqlPodDef
+	pod := mysql_pod(instance)
+
+	// debugging: this should print out the mysql pod def that we're going to build:
+	fmt.Println("New pod definition that will be used to create a new pod:")
+	fmt.Println(pod)
 
 	return ctrl.Result{}, nil
 }

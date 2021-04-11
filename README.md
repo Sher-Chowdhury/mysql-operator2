@@ -1128,5 +1128,12 @@ go mod tidy
 This in turn ended up updating the go.mod file. 
 
 
+At this point we now have a pod definition, so the next step is write code that will do the commandline eqiuvalent
+of `oc apply ...`. In Go we don't have an `oc apply ...` equivalent. Instead we only have the `oc create ...`
+
+That's why we have to write some if-(else-if) logic to mimic the `oc apply` capability. I.e. first perform a check that a pod matching the pod-definition doesn't already exist. If it does then we should take no further action, if it doesn't exist, then do the Go equivalent of `oc create ...`.
+
+Note, I hit more problem importing some packages. Fixed this by running the `Restart Language Server` vs-code command. 
+
 
 

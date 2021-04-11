@@ -7,7 +7,7 @@ import (
 )
 
 // newPodForCR returns a busybox pod with the same name/namespace as the cr
-func newPodForCR(cr *cachev1alpha1.MySQL) *corev1.Pod {
+func NewPodForCR(cr *cachev1alpha1.Mysql) *corev1.Pod {
 	labels := map[string]string{
 		"app": cr.Name,
 	}

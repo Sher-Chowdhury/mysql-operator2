@@ -1111,3 +1111,22 @@ First we add code to capture the CR's yaml data into a variable, see:
 
 In our example the cr's data is getting captured into a variable called "instance". 
 
+Now I'm going use that data to create a pod definition.
+
+To keep the code, organised, I'll create a nested package called 'pod', which will live in new folder called,
+`resources/pods`. 
+
+
+(git commit n10)
+
+note, I had an error when trying to import the pod package in in the controller file. I fixed that by running:
+
+```
+go mod tidy
+```
+
+this in turn ended up updating the go.mod file. 
+
+
+
+

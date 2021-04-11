@@ -22,7 +22,7 @@ func MysqlPodDef(cr *cachev1alpha1.Mysql) *corev1.Pod {
 			Containers: []corev1.Container{
 				{
 					Name:    "busybox",
-					Image:   "busybox",
+					Image:   "quay.io/sher_chowdhury0/busybox:latest",
 					Command: []string{"sleep", "3600"},
 					Env: []corev1.EnvVar{
 						{

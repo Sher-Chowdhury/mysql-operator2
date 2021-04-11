@@ -493,7 +493,7 @@ Next we create the bundle image for our operator (https://sdk.operatorframework.
 ```
 $ echo $OPERATOR_IMG
 quay.io/sher_chowdhury0/mysql-operator2:v0.0.1
-make bundle IMG=$OPERATOR_IMG
+$ make bundle IMG=$OPERATOR_IMG
 
 /Users/sherchowdhury/github/mysql-operator2/mysql-operator2/bin/controller-gen "crd:trivialVersions=true,preserveUnknownFields=false" rbac:roleName=manager-role webhook paths="./..." output:crd:artifacts:config=config/crd/bases
 go: creating new go.mod: module tmp

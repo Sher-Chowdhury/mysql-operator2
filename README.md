@@ -1125,7 +1125,7 @@ note, I had an error when trying to import the pod package in in the controller 
 go mod tidy
 ```
 
-this in turn ended up updating the go.mod file. 
+This in turn ended up updating the go.mod file. 
 
 
 

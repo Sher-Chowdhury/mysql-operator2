@@ -1101,3 +1101,13 @@ no changes added to commit (use "git add" and/or "git commit -a")
 ```
 
 (git commit no7)
+
+
+Now we can start using updating the `controllers/mysql_controller.go` to create resources ( e.g. pods, secrets, configmaps) from our CR's data. 
+
+First we add code to capture the CR's yaml data into a variable, see:
+
+(git commit no8)
+
+In our example the cr's data is getting captured into a variable called "instance". 
+

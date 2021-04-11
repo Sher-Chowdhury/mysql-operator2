@@ -20,14 +20,13 @@ import (
 	"context"
 	"fmt"
 
+	cachev1alpha1 "github.com/Sher-Chowdhury/mysql-operator2/api/v1alpha1"
 	"github.com/go-logr/logr"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-
-	cachev1alpha1 "github.com/Sher-Chowdhury/mysql-operator2/api/v1alpha1"
 )
 
 // MysqlReconciler reconciles a Mysql object
@@ -74,6 +73,13 @@ func (r *MysqlReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
 	}
 	// debugging: this should print out the mysql CR's yaml data:
 	fmt.Println(instance)
+
+	// Define a new Pod object. This is the equivalent of writing a pod yaml file, but not applyin it yet.  
+	var mysql_pod = mysql_pod.newPodForCR
+
+	pod := mysql_pod(instance)	
+	// debugging: this should print out the mysql CR's yaml data:
+	fmt.Println(pod)
 
 	
 

@@ -173,6 +173,18 @@ $ operator-sdk create api --group cache --version v1alpha1 --kind Mysql --resour
 Note, an operator can manage 1 or more CRDs, these CRDs are referred to as "APIs" as indicated in the above example. In this example we created
 the kind "mysql" but maybe we can generate other secondary-like crds, e.g. `mysqlconfig` and `mysqllogincreds`. 
 
+each "kind" (aka operand), e.g. mysqlconfig comes with a pair of files:
+
+- api/v1alpha1/mysqlconfig_types.go       # *_types.go file is where we define the crd structure 
+- controllers/mysqlconfig_controller.go   # *_controller.go file is where we define what child resources should be created. 
+
+So far we have created a kind called "mysql" so we have:
+
+- api/v1alpha1/mysql_types.go       # *_types.go file is where we define the crd structure 
+- controllers/mysql_controller.go   # *_controller.go file is where we define what child resources should be created. 
+
+
+
 see:  https://sdk.operatorframework.io/docs/building-operators/golang/quickstart/
 
 Also see: https://sdk.operatorframework.io/docs/building-operators/golang/tutorial/#create-a-new-api-and-controller

@@ -1,4 +1,4 @@
-package pods
+package pod
 
 import (
 	cachev1alpha1 "github.com/Sher-Chowdhury/mysql-operator2/api/v1alpha1"

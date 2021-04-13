@@ -110,14 +110,13 @@ func (r *MysqlReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
 		}
 
 		// Pod created successfully - don't requeue
-		// return reconcile.Result{}, nil    // I don't think this line is needed. 
+		// return reconcile.Result{}, nil    // I don't think this line is needed.
 		fmt.Println("The following pod is now created: " + pod.Name)
 
 	} else if err != nil {
 		// if instead we get some other kind of error then raise it as an actual error.
 		return reconcile.Result{}, err
 	}
-
 
 	return ctrl.Result{}, nil
 }

@@ -20,23 +20,14 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/go-logr/logr"
 	"k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	cachev1alpha1 "github.com/Sher-Chowdhury/mysql-operator2/api/v1alpha1"
 	pod "github.com/Sher-Chowdhury/mysql-operator2/resources/pod"
+	"github.com/Sher-Chowdhury/mysql-operator2/utils"
 )
-
-// MysqlReconciler reconciles a Mysql object
-type MysqlReconciler struct {
-	client.Client
-	Log    logr.Logger
-	Scheme *runtime.Scheme
-}
 
 // +kubebuilder:rbac:groups=cache.codingbee.net,resources=mysqls,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=cache.codingbee.net,resources=mysqls/status,verbs=get;update;patch
@@ -51,7 +42,7 @@ type MysqlReconciler struct {
 //
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.7.0/pkg/reconcile
-func (r *MysqlReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+func (r *utils.MysqlReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	_ = r.Log.WithValues("mysql", req.NamespacedName)
 
 	// your logic here
